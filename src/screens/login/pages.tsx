@@ -1,12 +1,16 @@
 'use client';
 
 import useSupabaseBrowser from '@/app/supabase-browser';
+import { useAuthStore } from '@/store/useAuthStore';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { Box, Button, Container, IconButton, InputAdornment, Paper, TextField, Typography } from '@mui/material';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 const LoginContainer = () => {
+    const { setUser } = useAuthStore();
     const supabase = useSupabaseBrowser();
+    const router = useRouter();
 
     const [showPassword, setShowPassword] = useState(false);
     const [loginData, setLoginData] = useState({
@@ -20,13 +24,13 @@ const LoginContainer = () => {
 
     const handleSubmit = async () => {
         try {
-            console.log(loginData.username);
+            console.log(supabase);
             const { data, error } = await supabase
                 .from('profiles')
                 .select('username, email')
                 .eq('username', loginData.username.trim())
                 .maybeSingle();
-
+            console.log(data);
             if (error) {
                 console.error('프로필 조회 오류:', error);
                 handleAlert('로그인 중 오류가 발생했습니다.');
@@ -51,14 +55,25 @@ const LoginContainer = () => {
 
     const handleLogin = async (data: any) => {
         try {
-            await supabase.auth.signInWithPassword({
+            const { data: userData, error } = await supabase.auth.signInWithPassword({
                 email: data.email,
                 password: loginData.password,
             });
 
+            console.log(userData);
+            console.log(error);
+            if (error) {
+                handleAlert('비밀번호를 다시입력해주세요.');
+                console.log(error);
+                return;
+            }
+
+            router.push('/');
+            setUser(userData.user);
             handleAlert('로그인됐습니다.');
         } catch (err) {
             console.log(err);
+            handleAlert('로그인에 실패했습니다.');
         }
     };
 

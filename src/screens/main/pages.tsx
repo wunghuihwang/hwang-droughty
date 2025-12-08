@@ -73,7 +73,7 @@ export default function MainContainer() {
                         天倫의 정을 이어가는
                         <br />
                         <Typography component="span" variant="h2" sx={{ color: '#1976d2', fontWeight: 700 }}>
-                            OO김씨 대종회
+                            OO황씨
                         </Typography>
                     </Typography>
                     <Typography variant="h5" sx={{ color: 'text.secondary', mb: 4 }}>

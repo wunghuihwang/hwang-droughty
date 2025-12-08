@@ -1,5 +1,5 @@
-import Footer from '@/components/layout/footer/pages';
-import Header from '@/components/layout/header/pages';
+import AuthInitializer from '@/components/layout/auth/AuthInitializer';
+import LayoutContent from '@/components/layout/pages';
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
@@ -23,9 +23,8 @@ export default function RootLayout({
             <html lang="en">
                 <body style={{ fontFamily: 'Roboto, var(--font-geist-sans)', width: '100vw', height: '100vh' }}>
                     <AppRouterCacheProvider>
-                        <Header />
-                        {children}
-                        <Footer />
+                        <AuthInitializer />
+                        <LayoutContent>{children}</LayoutContent>
                     </AppRouterCacheProvider>
                 </body>
             </html>

@@ -1,4 +1,6 @@
 'use client';
+import useSupabaseBrowser from '@/app/supabase-browser';
+import { useAuthStore } from '@/store/useAuthStore';
 import CloseIcon from '@mui/icons-material/Close';
 import MenuIcon from '@mui/icons-material/Menu';
 import {
@@ -6,18 +8,25 @@ import {
     Box,
     Button,
     Container,
+    Divider,
     Drawer,
     IconButton,
     List,
     ListItem,
     ListItemButton,
     ListItemText,
+    Skeleton,
     Toolbar,
     Typography,
 } from '@mui/material';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+
 export default function Header() {
     const [mobileOpen, setMobileOpen] = useState(false);
+    const { user, loading } = useAuthStore();
+    const supabase = useSupabaseBrowser();
+    const router = useRouter();
 
     const menuItems = ['대종회 소개', '족보', '종원마당', '알림마당', '문의하기'];
 
@@ -25,11 +34,15 @@ export default function Header() {
         setMobileOpen(!mobileOpen);
     };
 
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+        router.push('/login');
+    };
+
     return (
         <AppBar position="static" sx={{ background: 'linear-gradient(90deg, #1565c0 0%, #1976d2 100%)' }}>
             <Container maxWidth="lg">
                 <Toolbar disableGutters>
-                    {/* Logo */}
                     <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
                         <Box
                             sx={{
@@ -47,7 +60,7 @@ export default function Header() {
                         </Box>
                         <Box>
                             <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
-                                상주황씨 소종회
+                                상주황
                             </Typography>
                             <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
                                 始祖 OO公 宗中
@@ -55,16 +68,71 @@ export default function Header() {
                         </Box>
                     </Box>
 
-                    {/* Desktop Menu */}
-                    <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 3 }}>
+                    <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 3, alignItems: 'center' }}>
                         {menuItems.map((item) => (
                             <Button key={item} sx={{ color: 'white', fontWeight: 500 }}>
                                 {item}
                             </Button>
                         ))}
+
+                        {loading ? (
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 2 }}>
+                                <Skeleton
+                                    variant="text"
+                                    width={60}
+                                    height={20}
+                                    sx={{ bgcolor: 'rgba(255,255,255,0.3)' }}
+                                />
+                            </Box>
+                        ) : user ? (
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, ml: 2 }}>
+                                <Typography
+                                    sx={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.875rem', fontWeight: 500 }}
+                                >
+                                    {user.user_metadata?.name || user.email}
+                                </Typography>
+                                <Typography sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.875rem' }}>|</Typography>
+                                <Button
+                                    onClick={handleLogout}
+                                    sx={{
+                                        color: 'white',
+                                        fontSize: '0.875rem',
+                                        minWidth: 'auto',
+                                        px: 1,
+                                    }}
+                                >
+                                    로그아웃
+                                </Button>
+                            </Box>
+                        ) : (
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, ml: 2 }}>
+                                <Button
+                                    href="/login"
+                                    sx={{
+                                        color: 'white',
+                                        fontSize: '0.875rem',
+                                        minWidth: 'auto',
+                                        px: 1,
+                                    }}
+                                >
+                                    로그인
+                                </Button>
+                                <Typography sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.875rem' }}>|</Typography>
+                                <Button
+                                    href="/signup"
+                                    sx={{
+                                        color: 'white',
+                                        fontSize: '0.875rem',
+                                        minWidth: 'auto',
+                                        px: 1,
+                                    }}
+                                >
+                                    회원가입
+                                </Button>
+                            </Box>
+                        )}
                     </Box>
 
-                    {/* Mobile Menu Button */}
                     <IconButton
                         color="inherit"
                         edge="end"
@@ -76,7 +144,6 @@ export default function Header() {
                 </Toolbar>
             </Container>
 
-            {/* Mobile Drawer */}
             <Drawer
                 anchor="right"
                 open={mobileOpen}
@@ -98,6 +165,43 @@ export default function Header() {
                             </ListItem>
                         ))}
                     </List>
+
+                    <Divider sx={{ my: 2 }} />
+
+                    {loading ? (
+                        <Box sx={{ px: 2 }}>
+                            <Skeleton variant="text" width="100%" height={40} />
+                        </Box>
+                    ) : user ? (
+                        <List>
+                            <ListItem>
+                                <ListItemText primary={user.user_metadata?.name || user.email} secondary="로그인됨" />
+                            </ListItem>
+                            <ListItem disablePadding>
+                                <ListItemButton
+                                    onClick={() => {
+                                        handleLogout();
+                                        handleDrawerToggle();
+                                    }}
+                                >
+                                    <ListItemText primary="로그아웃" />
+                                </ListItemButton>
+                            </ListItem>
+                        </List>
+                    ) : (
+                        <List>
+                            <ListItem disablePadding>
+                                <ListItemButton href="/login" onClick={handleDrawerToggle}>
+                                    <ListItemText primary="로그인" />
+                                </ListItemButton>
+                            </ListItem>
+                            <ListItem disablePadding>
+                                <ListItemButton href="/signup" onClick={handleDrawerToggle}>
+                                    <ListItemText primary="회원가입" />
+                                </ListItemButton>
+                            </ListItem>
+                        </List>
+                    )}
                 </Box>
             </Drawer>
         </AppBar>
