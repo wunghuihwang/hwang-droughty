@@ -1,7 +1,7 @@
 'use client';
 
-import useSignUp from '@/api/signup';
 import useSupabaseBrowser from '@/app/supabase-browser';
+import CustomDialog from '@/lib/dialog';
 import { SignUpTypes } from '@/types/signup.type';
 import { isEmpty, validators } from '@/utill/utill';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
@@ -25,7 +25,6 @@ import { useState } from 'react';
 const SignupContainer = () => {
     const supabase = useSupabaseBrowser();
     const router = useRouter();
-    const signUp = useSignUp();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [openModal, setOpenModal] = useState(false);
@@ -59,46 +58,66 @@ const SignupContainer = () => {
 
     const handleSignup = async () => {
         if (isEmpty(signupData.name)) {
-            alert('이름을 입력해주세요');
+            CustomDialog.alert({
+                content: '이름을 입력해주세요.',
+            });
             return;
         }
         if (isEmpty(signupData.age)) {
-            alert('나이를 입력해주세요');
+            CustomDialog.alert({
+                content: '나이를 입력해주세요.',
+            });
             return;
         }
         if (isEmpty(signupData.username)) {
-            alert('아이디를 입력해주세요');
+            CustomDialog.alert({
+                content: '아이디를 입력해주세요.',
+            });
             return;
         }
         if (isEmpty(signupData.password)) {
-            alert('비밀번호를 입력해주세요');
+            CustomDialog.alert({
+                content: '비밀번호를 입력해주세요.',
+            });
             return;
         }
         if (isEmpty(signupData.confirmPassword)) {
-            alert('비밀번호 확인을 입력해주세요');
+            CustomDialog.alert({
+                content: '비밀번호 확인을 입력해주세요.',
+            });
             return;
         }
         if (signupData.password !== signupData.confirmPassword) {
-            alert('비밀번호가 일치하지 않습니다.');
+            CustomDialog.alert({
+                content: '비밀번호가 일치하지 않습니다.',
+            });
             return;
         }
         if (isEmpty(signupData.phone)) {
-            alert('핸드폰번호를 입력해주세요');
+            CustomDialog.alert({
+                content: '핸드폰번호를 입력해주세요.',
+            });
             return;
         }
 
         if (isEmpty(signupData.email)) {
-            alert('이메일을 입력해주세요');
+            CustomDialog.alert({
+                content: '이메일을 입력해주세요.',
+            });
             return;
         }
 
         if (!validators.password(signupData.password)) {
-            alert('비밀번호는 대문자, 소문자, 숫자, 특수문자를 포함해야 합니다.');
+            CustomDialog.alert({
+                content: '비밀번호는 대문자, 소문자, 숫자, 특수문자를 포함해야 합니다.',
+            });
             return;
         }
 
         if (!validators.email(signupData.email)) {
-            alert('올바른 이메일 형식을 입력해주세요.');
+            CustomDialog.alert({
+                content: '올바른 이메일 형식을 입력해주세요.',
+            });
             return;
         }
 
@@ -119,6 +138,10 @@ const SignupContainer = () => {
             });
 
             console.log(data);
+            CustomDialog.success({
+                title: '가입완료',
+                content: '회원가입이 완료되었습니다.',
+            });
 
             if (error) throw error;
 

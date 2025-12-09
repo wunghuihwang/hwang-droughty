@@ -35,17 +35,25 @@ export default function Header() {
         setMobileOpen(!mobileOpen);
     };
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         CustomDialog.confirm({
             title: '로그아웃',
             content: '로그아웃을 하시겠습니까?',
             onConfirm: async () => {
-                await supabase.auth.signOut();
+                try {
+                    await supabase.auth.signOut({ scope: 'local' });
+
+                    supabase.auth.onAuthStateChange((event, session) => {
+                        if (event === 'SIGNED_OUT') {
+                            localStorage.removeItem('supabase-auth-token');
+                        }
+                    });
+                } catch (err) {
+                    console.error('로그아웃 에러:', err);
+                }
             },
         });
-        // router.push('/login');
     };
-
     return (
         <AppBar position="static" sx={{ background: 'linear-gradient(90deg, #1565c0 0%, #1976d2 100%)' }}>
             <Container maxWidth="lg">
