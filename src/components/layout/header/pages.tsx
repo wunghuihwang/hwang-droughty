@@ -1,5 +1,6 @@
 'use client';
 import useSupabaseBrowser from '@/app/supabase-browser';
+import CustomDialog from '@/lib/dialog';
 import { useAuthStore } from '@/store/useAuthStore';
 import CloseIcon from '@mui/icons-material/Close';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -34,16 +35,25 @@ export default function Header() {
         setMobileOpen(!mobileOpen);
     };
 
-    const handleLogout = async () => {
-        await supabase.auth.signOut();
-        router.push('/login');
+    const handleLogout = () => {
+        CustomDialog.confirm({
+            title: '로그아웃',
+            content: '로그아웃을 하시겠습니까?',
+            onConfirm: async () => {
+                await supabase.auth.signOut();
+            },
+        });
+        // router.push('/login');
     };
 
     return (
         <AppBar position="static" sx={{ background: 'linear-gradient(90deg, #1565c0 0%, #1976d2 100%)' }}>
             <Container maxWidth="lg">
                 <Toolbar disableGutters>
-                    <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+                    <Box
+                        sx={{ display: 'flex', alignItems: 'center', flexGrow: 1, cursor: 'pointer' }}
+                        onClick={() => router.push('/')}
+                    >
                         <Box
                             sx={{
                                 width: 48,

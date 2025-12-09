@@ -1,7 +1,7 @@
 import useSupabaseBrowser from '@/app/supabase-browser';
 import { SignUpTypes } from '@/types/signup.type';
 
-export const signUpQuery = async (signupData: SignUpTypes) => {
+export const sendSignUp = async (signupData: SignUpTypes) => {
     const supabase = useSupabaseBrowser();
 
     const { data, error } = await supabase.auth.signUp({
@@ -16,4 +16,8 @@ export const signUpQuery = async (signupData: SignUpTypes) => {
             },
         },
     });
+
+    if (error) throw new Error(error.message);
+
+    return data;
 };

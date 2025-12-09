@@ -1,5 +1,6 @@
 'use client';
 
+import useSignUp from '@/api/signup';
 import useSupabaseBrowser from '@/app/supabase-browser';
 import { SignUpTypes } from '@/types/signup.type';
 import { isEmpty, validators } from '@/utill/utill';
@@ -24,6 +25,7 @@ import { useState } from 'react';
 const SignupContainer = () => {
     const supabase = useSupabaseBrowser();
     const router = useRouter();
+    const signUp = useSignUp();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [openModal, setOpenModal] = useState(false);
@@ -101,6 +103,8 @@ const SignupContainer = () => {
         }
 
         try {
+            // console.log(signupData);
+            // signUp.mutate(signupData);
             const { data, error } = await supabase.auth.signUp({
                 email: signupData.email,
                 password: signupData.password,

@@ -1,11 +1,31 @@
+'use client';
+
+import NoticeViewModal from '@/components/notice/NoticeViewModal/page';
+import { useNoticesList } from '@/query/notice';
+import { Post, useNoticetore } from '@/store/useNoticeStore';
 import BookIcon from '@mui/icons-material/Book';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import PeopleIcon from '@mui/icons-material/People';
 import { Box, Button, Card, CardContent, Container, Grid, Paper, Typography } from '@mui/material';
+import dayjs from 'dayjs';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function MainContainer() {
+    const router = useRouter();
+    const { setCurrentNotice, setViewOpen } = useNoticetore();
+    const { data: noticeData, isSuccess } = useNoticesList(1, 5);
+
+    const [noticeList, setNoticeList] = useState<Post[]>([]);
+
+    useEffect(() => {
+        if (isSuccess && Array.isArray(noticeData)) {
+            setNoticeList(noticeData);
+        }
+    }, [isSuccess, noticeData]);
+
     const features = [
         {
             title: '족보 관리',
@@ -27,13 +47,6 @@ export default function MainContainer() {
             description: '유서 깊은 가문의 역사 보존',
             icon: <EmojiEventsIcon sx={{ fontSize: 48, color: '#ed6c02' }} />,
         },
-    ];
-
-    const notices = [
-        { title: '2024년 정기총회 개최 안내', date: '2024.11.15' },
-        { title: '추계 시제 일정 공지', date: '2024.10.28' },
-        { title: '족보 수정 신청 접수', date: '2024.10.20' },
-        { title: '종원 등록 안내', date: '2024.10.10' },
     ];
 
     const gallery = [
@@ -178,12 +191,16 @@ export default function MainContainer() {
                                     <Typography variant="h5" sx={{ fontWeight: 700 }}>
                                         공지사항
                                     </Typography>
-                                    <Button endIcon={<ChevronRightIcon />} sx={{ fontWeight: 600 }}>
+                                    <Button
+                                        endIcon={<ChevronRightIcon />}
+                                        sx={{ fontWeight: 600 }}
+                                        onClick={() => router.push('/notice')}
+                                    >
                                         더보기
                                     </Button>
                                 </Box>
                                 <Box>
-                                    {notices.map((notice, index) => (
+                                    {noticeList.map((notice, index) => (
                                         <Box
                                             key={index}
                                             sx={{
@@ -191,18 +208,23 @@ export default function MainContainer() {
                                                 justifyContent: 'space-between',
                                                 alignItems: 'center',
                                                 py: 2,
-                                                borderBottom: index < notices.length - 1 ? '1px solid #e0e0e0' : 'none',
+                                                borderBottom:
+                                                    index < noticeList.length - 1 ? '1px solid #e0e0e0' : 'none',
                                                 cursor: 'pointer',
                                                 '&:hover': { bgcolor: '#f5f5f5' },
                                                 px: 1,
                                                 borderRadius: 1,
+                                            }}
+                                            onClick={() => {
+                                                setCurrentNotice(notice);
+                                                setViewOpen(true);
                                             }}
                                         >
                                             <Typography variant="body1" sx={{ fontWeight: 500 }}>
                                                 {notice.title}
                                             </Typography>
                                             <Typography variant="caption" color="text.secondary">
-                                                {notice.date}
+                                                {dayjs(notice.created_at).format('YYYY-MM-DD')}
                                             </Typography>
                                         </Box>
                                     ))}
@@ -336,6 +358,7 @@ export default function MainContainer() {
                     </Grid>
                 </Container>
             </Box>
+            <NoticeViewModal />
         </Box>
     );
 }
