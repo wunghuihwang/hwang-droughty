@@ -8,7 +8,6 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { Post, useNoticetore } from '@/store/useNoticeStore';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import VisibilityIcon from '@mui/icons-material/Visibility';
 import {
     AppBar,
     Box,
@@ -32,7 +31,7 @@ export default function NoticeBoard() {
     const { setCurrentNotice, setEditMode, setEditOpen, setFormNotice, setViewOpen } = useNoticetore();
     const { user } = useAuthStore();
     const { data: noticeData, isSuccess } = useNoticesList(1, 10);
-    const { mutate: deleteNotice, error: deleteError } = useDeleteNoticesRequest();
+    const deleteNoticeMutation = useDeleteNoticesRequest();
 
     const [userId, setUserId] = useState('');
     const [noticeList, setNoticeList] = useState<Post[]>([]);
@@ -65,7 +64,7 @@ export default function NoticeBoard() {
             title: '공지 삭제',
             content: '공지사항을 삭제하시겠습니까?',
             onConfirm: () => {
-                deleteNotice(
+                deleteNoticeMutation.mutate(
                     {
                         id,
                     },
@@ -125,7 +124,7 @@ export default function NoticeBoard() {
                         </TableHead>
                         <TableBody>
                             {noticeList.map((notice) => (
-                                <TableRow key={notice.idx} hover>
+                                <TableRow key={notice.idx} hover onClick={() => handleView(notice)}>
                                     <TableCell align="center">{notice.idx}</TableCell>
                                     <TableCell>
                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>{notice.title}</Box>
@@ -136,14 +135,6 @@ export default function NoticeBoard() {
                                     </TableCell>
                                     {user && user.id === notice.author_id && (
                                         <TableCell align="center">
-                                            <IconButton
-                                                size="small"
-                                                color="primary"
-                                                onClick={() => handleView(notice)}
-                                                title="보기"
-                                            >
-                                                <VisibilityIcon />
-                                            </IconButton>
                                             <IconButton
                                                 size="small"
                                                 color="warning"

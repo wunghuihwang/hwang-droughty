@@ -29,7 +29,24 @@ export default function Header() {
     const supabase = useSupabaseBrowser();
     const router = useRouter();
 
-    const menuItems = ['대종회 소개', '족보', '종원마당', '알림마당', '문의하기'];
+    const menuItems = [
+        {
+            title: '대종회 소개',
+            route: 'about',
+        },
+        {
+            title: '종원마당',
+            route: 'jongwon',
+        },
+        {
+            title: '알림마당',
+            route: 'alim',
+        },
+        {
+            title: '문의하기',
+            route: 'contact',
+        },
+    ];
 
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);
@@ -87,9 +104,13 @@ export default function Header() {
                     </Box>
 
                     <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 3, alignItems: 'center' }}>
-                        {menuItems.map((item) => (
-                            <Button key={item} sx={{ color: 'white', fontWeight: 500 }}>
-                                {item}
+                        {menuItems.map((item, idx) => (
+                            <Button
+                                key={idx}
+                                sx={{ color: 'white', fontWeight: 500 }}
+                                onClick={() => router.push(`/${item.route}`)}
+                            >
+                                {item.title}
                             </Button>
                         ))}
 
@@ -175,10 +196,10 @@ export default function Header() {
                         </IconButton>
                     </Box>
                     <List>
-                        {menuItems.map((item) => (
-                            <ListItem disablePadding key={item}>
+                        {menuItems.map((item, idx) => (
+                            <ListItem disablePadding key={idx}>
                                 <ListItemButton onClick={handleDrawerToggle}>
-                                    <ListItemText primary={item} />
+                                    <ListItemText primary={item.title} />
                                 </ListItemButton>
                             </ListItem>
                         ))}
