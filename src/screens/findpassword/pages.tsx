@@ -1,6 +1,6 @@
 'use client';
 
-import useSupabaseBrowser from '@/app/supabase-browser';
+import { useFindPasswordRequest } from '@/query/auth';
 import { Alert, Box, Button, Container, Paper, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
 
@@ -8,7 +8,8 @@ const FindPasswordPage = () => {
     const [emailData, setEmailData] = useState<string>('');
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-    const supabase = useSupabaseBrowser();
+
+    const findpasswordMutation = useFindPasswordRequest();
 
     const handleFindPassword = async () => {
         if (!emailData) {
@@ -20,40 +21,33 @@ const FindPasswordPage = () => {
         setMessage(null);
 
         try {
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('email')
-                .eq('email', emailData)
-                .maybeSingle();
-
-            if (!data) {
-                setMessage({
-                    type: 'error',
-                    text: '존재하지 않은 이메일입니다. 이메일을 확인해주세요.',
-                });
-
-                return;
-            }
-
-            const { data: passwordResetData, error: passwordResetError } = await supabase.auth.resetPasswordForEmail(
-                emailData,
+            findpasswordMutation.mutate(
+                { email: emailData },
                 {
-                    redirectTo: `${window.location.origin}/updatepassword`,
+                    onSuccess: (data) => {
+                        if (!data) {
+                            setMessage({
+                                type: 'error',
+                                text: '존재하지 않은 이메일입니다. 이메일을 확인해주세요.',
+                            });
+
+                            return;
+                        } else {
+                            setMessage({
+                                type: 'success',
+                                text: '비밀번호 재설정 링크가 이메일로 전송되었습니다. 이메일을 확인해주세요.',
+                            });
+                            setEmailData('');
+                        }
+                    },
+                    onError: (error) => {
+                        setMessage({
+                            type: 'error',
+                            text: '비밀번호 재설정 링크 전송에 실패했습니다.',
+                        });
+                    },
                 },
             );
-
-            if (passwordResetError) {
-                setMessage({
-                    type: 'error',
-                    text: '비밀번호 재설정 링크 전송에 실패했습니다.',
-                });
-            } else {
-                setMessage({
-                    type: 'success',
-                    text: '비밀번호 재설정 링크가 이메일로 전송되었습니다. 이메일을 확인해주세요.',
-                });
-                setEmailData(''); // 입력 필드 초기화
-            }
         } catch (err) {
             console.error(err);
             setMessage({

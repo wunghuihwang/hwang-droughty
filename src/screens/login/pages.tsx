@@ -1,6 +1,6 @@
 'use client';
 
-import useSupabaseBrowser from '@/app/supabase-browser';
+import { useGetUserRequest, useLoginRequest } from '@/query/auth';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { Box, Button, Container, IconButton, InputAdornment, Paper, TextField, Typography } from '@mui/material';
@@ -9,9 +9,10 @@ import { useState } from 'react';
 
 const LoginContainer = () => {
     const { setUser } = useAuthStore();
-    const supabase = useSupabaseBrowser();
     const router = useRouter();
 
+    const userMutation = useGetUserRequest();
+    const loginMutation = useLoginRequest();
     const [showPassword, setShowPassword] = useState(false);
     const [loginData, setLoginData] = useState({
         username: '',
@@ -24,30 +25,24 @@ const LoginContainer = () => {
 
     const handleSubmit = async () => {
         try {
-            console.log(supabase);
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('username, email')
-                .eq('username', loginData.username.trim())
-                .maybeSingle();
-            console.log(data);
-            if (error) {
-                console.error('프로필 조회 오류:', error);
-                handleAlert('로그인 중 오류가 발생했습니다.');
-                return;
-            }
+            userMutation.mutate(loginData.username, {
+                onSuccess: (userData) => {
+                    if (!userData?.username) {
+                        handleAlert('존재하지 않는 아이디입니다.');
+                        return;
+                    }
 
-            if (!data?.username) {
-                handleAlert('존재하지 않는 아이디입니다.');
-                return;
-            }
+                    if (!userData.email) {
+                        handleAlert('이메일 정보가 없습니다. 관리자에게 문의하세요.');
+                        return;
+                    }
 
-            if (!data.email) {
-                handleAlert('이메일 정보가 없습니다. 관리자에게 문의하세요.');
-                return;
-            }
-
-            handleLogin(data);
+                    handleLogin(userData);
+                },
+                onError: (error) => {
+                    handleAlert(`로그인 중 오류가 발생했습니다.: ${error}`);
+                },
+            });
         } catch (err) {
             console.log(err);
         }
@@ -55,22 +50,22 @@ const LoginContainer = () => {
 
     const handleLogin = async (data: any) => {
         try {
-            const { data: userData, error } = await supabase.auth.signInWithPassword({
-                email: data.email,
-                password: loginData.password,
-            });
-
-            console.log(userData);
-            console.log(error);
-            if (error) {
-                handleAlert('비밀번호를 다시입력해주세요.');
-                console.log(error);
-                return;
-            }
-
-            router.push('/');
-            setUser(userData.user);
-            handleAlert('로그인됐습니다.');
+            loginMutation.mutate(
+                {
+                    email: data.email,
+                    password: loginData.password,
+                },
+                {
+                    onSuccess: (userData) => {
+                        router.push('/');
+                        setUser(userData?.user);
+                        handleAlert('로그인됐습니다.');
+                    },
+                    onError: (error) => {
+                        handleAlert(`로그인 중 에러가 발생했습니다.: ${error}`);
+                    },
+                },
+            );
         } catch (err) {
             console.log(err);
             handleAlert('로그인에 실패했습니다.');
