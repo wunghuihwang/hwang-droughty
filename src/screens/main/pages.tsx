@@ -194,7 +194,7 @@ export default function MainContainer() {
                                     <Button
                                         endIcon={<ChevronRightIcon />}
                                         sx={{ fontWeight: 600 }}
-                                        onClick={() => router.push('/notice')}
+                                        onClick={() => router.push('/alim')}
                                     >
                                         더보기
                                     </Button>
